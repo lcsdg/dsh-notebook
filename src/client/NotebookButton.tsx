@@ -86,6 +86,10 @@ export function NotebookButton(props: NotebookButtonProps): React.JSX.Element {
   const [anchor, setAnchor] = useState<PanelAnchor | null>(null)
   /** Current actionable text selection (floating add button), or null. */
   const [selection, setSelection] = useState<ActiveSelection | null>(null)
+  /** Mirror of the latest actionable selection, immune to render timing. */
+  const selectionRef = useRef<ActiveSelection | null>(null)
+  /** Frozen popup text (the popup must survive the live selection collapsing). */
+  const [popupText, setPopupText] = useState('')
   /** Whether the add-to-notebook popup is open. */
   const [popupOpen, setPopupOpen] = useState(false)
   /** The session tab strip DOM node (button host), or null for the fallback seat. */
@@ -98,7 +102,10 @@ export function NotebookButton(props: NotebookButtonProps): React.JSX.Element {
   })
 
   // Observe selection for the "add to notebook" affordance.
-  useEffect(() => observeSelection(setSelection), [])
+  useEffect(() => observeSelection((sel) => {
+    if (sel !== null) selectionRef.current = sel
+    setSelection(sel)
+  }), [])
 
   // Flush any pending content save before unload; dispose the store on unmount.
   useEffect(() => {
@@ -136,12 +143,16 @@ export function NotebookButton(props: NotebookButtonProps): React.JSX.Element {
   }, [open, store])
 
   const handleAdd = (): void => {
-    if (selection === null) return
+    const sel = selectionRef.current
+    if (sel === null) return
+    setPopupText(sel.text)
     setPopupOpen(true)
   }
 
   const finishAdd = (): void => {
     setPopupOpen(false)
+    setPopupText('')
+    selectionRef.current = null
     setSelection(null)
     clearActiveSelection()
   }
@@ -208,10 +219,10 @@ export function NotebookButton(props: NotebookButtonProps): React.JSX.Element {
         document.body,
       ) : null}
 
-      {popupOpen && selection !== null ? createPortal(
+      {popupOpen ? createPortal(
         <AddToNotebookPopup
           store={store}
-          text={selection.text}
+          text={popupText}
           t={t}
           onClose={finishAdd}
           onDone={finishAdd}

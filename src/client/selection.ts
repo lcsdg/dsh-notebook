@@ -69,8 +69,28 @@ export function observeSelection(onChange: (sel: ActiveSelection | null) => void
   // A mouseup carries the exact cursor position — the best anchor for the
   // floating button. Keyboard/scroll changes fall back to the selection rect.
   let last: ActiveSelection | null = null
+  let down: { x: number; y: number } | null = null
+  const onMouseDown = (e: MouseEvent): void => {
+    // A gesture starting inside this plugin's own UI (the floating button,
+    // panel, popup) is an interaction, not a text gesture: never treat its
+    // mouseup as a click-suppression, or the button's own click never lands.
+    const target = e.target instanceof Element ? e.target.closest('[data-notebook-ui]') : null
+    down = target !== null ? null : { x: e.clientX, y: e.clientY }
+  }
   const update = (e?: Event): void => {
     const mouse = e instanceof MouseEvent ? { x: e.clientX, y: e.clientY } : undefined
+    // A mouseup with the pointer barely moved is a plain CLICK (or a
+    // double-click word pick), not a selection drag: suppress the affordance
+    // so it never pops up under the cursor unprompted.
+    if (mouse !== undefined && down !== null) {
+      const moved = Math.hypot(mouse.x - down.x, mouse.y - down.y)
+      down = null
+      if (moved < 6) {
+        last = null
+        onChange(null)
+        return
+      }
+    }
     const next = readActiveSelection(window.getSelection(), mouse)
     // Non-mouse events after a mouse gesture (scroll/keyup) must not re-anchor
     // the button away from the cursor: while the selected text is unchanged,
@@ -83,11 +103,13 @@ export function observeSelection(onChange: (sel: ActiveSelection | null) => void
     onChange(next)
   }
 
+  document.addEventListener('mousedown', onMouseDown, true)
   document.addEventListener('mouseup', update, true)
   document.addEventListener('keyup', update, true)
   // Reposition on any scroll so the floating button follows the selected text.
   document.addEventListener('scroll', update, true)
   return () => {
+    document.removeEventListener('mousedown', onMouseDown, true)
     document.removeEventListener('mouseup', update, true)
     document.removeEventListener('keyup', update, true)
     document.removeEventListener('scroll', update, true)

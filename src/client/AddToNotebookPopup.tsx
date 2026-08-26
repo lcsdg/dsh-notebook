@@ -47,15 +47,20 @@ export function AddToNotebookPopup(props: AddToNotebookPopupProps): React.JSX.El
   const notes = session.notes
   const selected = notes.find((n) => n.id === selectedId) ?? null
 
-  // Keep selection valid as the store re-reads.
+  // Keep selection valid as the store re-reads ('' = intentional create mode).
   useEffect(() => {
+    if (selectedId === '') return
     if (notes.length > 0 && !notes.some((n) => n.id === selectedId)) {
       setSelectedId(notes[0].id)
     }
   }, [notes, selectedId])
 
   const selectNote = (id: string): void => {
+    // Picking an existing note also leaves create mode: the target is that note.
     setSelectedId(id)
+    setAdding(false)
+    setAddName('')
+    setFormError('')
   }
 
   const commitAdd = (targetId: string, targetMode: Mode): void => {
@@ -66,12 +71,14 @@ export function AddToNotebookPopup(props: AddToNotebookPopupProps): React.JSX.El
   }
 
   const confirmAdd = (): void => {
-    if (selected !== null) {
-      commitAdd(selected.id, mode)
-      return
-    }
-    // No note selected — try to create one inline.
+    // While creating inline, the new note IS the target — create it and add
+    // into it (the "+" click already switched the selection away from the
+    // previously highlighted note).
     if (adding) {
+      if (addName.trim() === '') {
+        setFormError(t('panel.nameEmpty'))
+        return
+      }
       const result = store.addNote(addName)
       if (!result.ok) {
         setFormError(result.error === 'empty' ? t('panel.nameEmpty') : t('panel.duplicate'))
@@ -79,7 +86,9 @@ export function AddToNotebookPopup(props: AddToNotebookPopupProps): React.JSX.El
       }
       setSelectedId(result.note.id)
       commitAdd(result.note.id, mode)
+      return
     }
+    if (selected !== null) commitAdd(selected.id, mode)
   }
 
   const canSubmit = selected !== null || (adding && addName.trim() !== '')
@@ -88,6 +97,9 @@ export function AddToNotebookPopup(props: AddToNotebookPopupProps): React.JSX.El
     setAdding(true)
     setAddName('')
     setFormError('')
+    // The new note becomes the target: drop the previous highlight so the
+    // user sees the switch immediately.
+    setSelectedId('')
   }
 
   return (
