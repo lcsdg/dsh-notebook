@@ -1,0 +1,11 @@
+# dsh-notebook bundle patch: inserts the dual-face plugin row into the web
+# profile roster. Applied as a profile bundle layer (the `dsh.bundle.patch`
+# manifest field); install with
+# `dsh plugin --profile <web> add @max1997/dsh-notebook`.
+#
+# NOTE: `name` must be the *published import specifier* (the scoped package
+# name). Cordis imports it verbatim, so an unscoped shorthand here would make
+# Node look for a package named "dsh-notebook".
+- insert:
+    - id: notebook
+      name: "@max1997/dsh-notebook"
