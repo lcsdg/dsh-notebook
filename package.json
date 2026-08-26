@@ -74,7 +74,12 @@
     "lib",
     "src",
     "cordis.patch.yml",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lcsdg/dsh-notebook.git"
+  }
 }
