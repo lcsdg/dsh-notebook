@@ -1,7 +1,7 @@
 {
   "name": "@max1997/dsh-notebook",
   "description": "Per-session notepad for the dsh web GUI: a header button opens a dropdown panel where you collect AI answers/copy as notes, edit them, sync to the composer or send directly. Selecting text in the chat shows an \"Add to notebook\" affordance. Notes are stored per conversation in the official settings document (not localStorage).",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "packageManager": "pnpm@10.15.1",
   "engines": {
