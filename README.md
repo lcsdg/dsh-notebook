@@ -4,6 +4,26 @@
 
 A per-session notepad for the dsh web GUI. A header button drops a panel where you collect chat answers/copy as notes, edit them, sync them into the composer or send them directly. Select text in the chat to surface an "Add to notebook" button.
 
+## 预览 / Previews
+
+在会话标签栏右侧的「📖 记事本」标签点开面板：左侧列表、右侧编辑（自动保存）、底部「发送到输入框 / 直接发送」。
+
+Click the "Notebook" tab next to the session tabs to drop the panel: note list on the left, auto-saved editor on the right, and send/sync actions at the bottom.
+
+![面板总览 / Panel overview](https://raw.githubusercontent.com/lcsdg/dsh-notebook/main/docs/overview.png)
+
+在聊天内容中**选中文本**，会在鼠标旁出现橙色描边的「＋ 添加到记事本」按钮。
+
+Select chat text and an orange "Add to notebook" button appears next to the cursor.
+
+![选中文本 → 添加到记事本 / Select text → add to notebook](https://raw.githubusercontent.com/lcsdg/dsh-notebook/main/docs/select-to-notebook.png)
+
+点击后弹出目标选择：选已有记事本，或点「＋」新建——新建的记事本自动作为目标；写入模式支持追加（默认，自动加空行分隔）/ 覆盖。
+
+Pick an existing note or create a new one with "＋" (the target switches to it automatically); choose Append (default, blank-line separated) or Overwrite.
+
+![添加弹窗 / Add popup](https://raw.githubusercontent.com/lcsdg/dsh-notebook/main/docs/popup.png)
+
 ## 功能 / Features
 
 - **每个会话独立一份记事本**：数据按 `sessionId` 隔离，互不影响；重开/刷新同一会话内容还在（除非自己删除）。新会话首次打开时是空白状态。
@@ -25,6 +45,8 @@ dsh plugin --profile web add @max1997/dsh-notebook
 ```
 
 安装后**重启 dsh 进程**（host 半区注册 settings section），再**刷新 Web GUI 页面**。
+
+**升级**：`dsh plugin --profile web update @max1997/dsh-notebook`，然后重启 dsh + 刷新页面。
 
 ## 数据 / Data
 
